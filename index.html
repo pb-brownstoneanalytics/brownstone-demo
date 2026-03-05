@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Humble Bumble Book Store - Business Intelligence Dashboard | Brownstone Analytics</title>
+<style>
+  :root {
+    --navy: #0B1F3A; --navy-mid: #122944; --navy-light: #1A3A5C;
+    --gold: #C9922A; --gold-dark: #A87820;
+    --cream: #F8F4EC; --white: #FFFFFF;
+    --green: #2E7D32; --green-light: #388E3C;
+    --amber: #F57F17; --red: #C62828;
+    --steel: #546E7A; --border: #DDE3EA; --bg: #F4F7FA;
+    --text: #0B1F3A; --subtext: #546E7A;
+    --font-heading: 'Georgia', serif; --font-body: 'Segoe UI', sans-serif; --font-mono: 'Courier New', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-body); min-height: 100vh; }
+
+  .header { background: var(--navy); border-bottom: 3px solid var(--gold); padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .header-left { display: flex; align-items: center; gap: 20px; }
+  .logo-name { font-family: var(--font-heading); font-size: 18px; font-weight: bold; color: var(--gold); letter-spacing: 1px; }
+  .logo-sub { font-size: 9px; color: rgba(255,255,255,0.5); letter-spacing: 2px; text-transform: uppercase; }
+  .divider-v { width: 1px; height: 36px; background: rgba(255,255,255,0.15); }
+  .client-name { font-size: 16px; font-weight: 600; color: #FFFFFF; }
+  .client-sub { font-size: 10px; color: rgba(255,255,255,0.55); margin-top: 2px; }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .status-badge { background: rgba(201,146,42,0.2); border: 1px solid var(--gold); color: var(--gold); font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 3px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .date-stamp { font-size: 10px; color: rgba(255,255,255,0.5); }
+  .powered-by { font-size: 9px; color: rgba(255,255,255,0.4); }
+  .powered-by span { color: var(--gold); font-weight: 600; }
+
+  .nav-tabs { background: var(--white); display: flex; padding: 0 28px; border-bottom: 2px solid var(--border); gap: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .tab { padding: 10px 18px; font-size: 11px; font-weight: 600; color: var(--subtext); cursor: pointer; border-bottom: 3px solid transparent; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.5px; }
+  .tab:hover { color: var(--navy); }
+  .tab.active { color: var(--gold-dark); border-bottom-color: var(--gold); }
+
+  .content { padding: 20px 28px; }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+
+  .alert-banner { border-left: 4px solid var(--green); background: #F0F7F0; border: 1px solid #A5D6A7; border-left-width: 4px; padding: 10px 16px; border-radius: 4px; display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .alert-banner.warning { background: #FFF8E1; border-color: #FFE082; border-left-color: var(--amber); }
+  .alert-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--green); }
+  .alert-banner.warning .alert-dot { background: var(--amber); }
+  .alert-text { font-size: 11px; color: var(--text); line-height: 1.5; }
+  .alert-text strong { color: var(--green); }
+  .alert-banner.warning .alert-text strong { color: var(--amber); }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .kpi-card { background: var(--white); border-radius: 6px; padding: 16px; border-top: 3px solid transparent; box-shadow: 0 1px 4px rgba(0,0,0,0.07); }
+  .kpi-card.gold { border-top-color: var(--gold); } .kpi-card.green { border-top-color: var(--green); }
+  .kpi-card.amber { border-top-color: var(--amber); } .kpi-card.blue { border-top-color: var(--navy-light); }
+  .kpi-card.red { border-top-color: var(--red); }
+  .kpi-label { font-size: 9px; font-weight: 700; color: var(--subtext); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .kpi-value { font-family: var(--font-mono); font-size: 28px; font-weight: bold; color: var(--text); line-height: 1; margin-bottom: 6px; }
+  .kpi-value.gold-text { color: var(--gold-dark); } .kpi-value.green-text { color: var(--green); }
+  .kpi-value.amber-text { color: var(--amber); }
+  .kpi-sub { font-size: 9px; color: var(--subtext); }
+  .kpi-delta { display: inline-flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 600; padding: 2px 6px; border-radius: 3px; margin-top: 4px; }
+  .kpi-delta.up { background: #E8F5E9; color: var(--green); }
+  .kpi-delta.down { background: #FFEBEE; color: var(--red); }
+  .kpi-delta.neutral { background: #FFF8E1; color: var(--amber); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .wide-narrow { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+  .panel { background: var(--white); border-radius: 6px; padding: 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.07); border: 1px solid var(--border); }
+  .panel-title { font-size: 10px; font-weight: 700; color: var(--subtext); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .panel-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  .milestone-list { display: flex; flex-direction: column; gap: 8px; }
+  .milestone-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; background: var(--bg); border-radius: 4px; border-left: 3px solid transparent; border: 1px solid var(--border); border-left-width: 3px; }
+  .milestone-item.done { border-left-color: var(--green); } .milestone-item.active { border-left-color: var(--gold); background: #FFFBF2; } .milestone-item.upcoming { border-left-color: #B0BEC5; }
+  .milestone-icon { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; margin-top: 1px; }
+  .milestone-icon.done { background: var(--green); color: white; } .milestone-icon.active { background: var(--gold); color: var(--navy); font-weight: bold; } .milestone-icon.upcoming { background: var(--bg); color: #90A4AE; border: 1px solid #B0BEC5; }
+  .milestone-name { font-size: 11px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .milestone-meta { font-size: 9px; color: var(--subtext); }
+  .milestone-meta span { color: var(--gold-dark); font-weight: 600; }
+
+  .rev-table { width: 100%; border-collapse: collapse; }
+  .rev-table th { font-size: 9px; font-weight: 700; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.5px; padding: 6px 8px; text-align: left; border-bottom: 2px solid var(--border); }
+  .rev-table td { font-size: 10px; color: var(--text); padding: 8px 8px; border-bottom: 1px solid var(--border); font-family: var(--font-mono); }
+  .rev-table .row-label { font-family: var(--font-body); color: var(--subtext); font-size: 9px; }
+  .rev-table .total-row td { border-top: 2px solid var(--gold); color: var(--gold-dark); font-weight: bold; padding-top: 10px; background: #FFFBF2; }
+  .rev-table .go { color: var(--green); font-weight: bold; font-family: var(--font-body); font-size: 10px; }
+  .rev-table .conditional { color: var(--amber); font-weight: bold; font-family: var(--font-body); font-size: 10px; }
+  .rev-table .highlight-row td { background: #FFFBF2; }
+
+  .bar-chart { display: flex; flex-direction: column; gap: 10px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; }
+  .bar-label { font-size: 9px; color: var(--subtext); width: 120px; flex-shrink: 0; text-align: right; }
+  .bar-track { flex: 1; height: 20px; background: var(--bg); border-radius: 3px; overflow: hidden; border: 1px solid var(--border); }
+  .bar-fill { height: 100%; border-radius: 3px; display: flex; align-items: center; padding-left: 8px; font-size: 9px; font-weight: 700; white-space: nowrap; }
+  .bar-fill.gold-bar { background: var(--gold); color: white; } .bar-fill.green-bar { background: var(--green-light); color: white; }
+  .bar-fill.amber-bar { background: var(--amber); color: white; } .bar-fill.blue-bar { background: var(--navy-light); color: white; }
+  .bar-fill.red-bar { background: var(--red); color: white; }
+
+  .cat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .cat-card { background: var(--bg); border-radius: 4px; padding: 10px 12px; border-left: 3px solid #B0BEC5; border: 1px solid var(--border); border-left-width: 3px; }
+  .cat-card.primary { border-left-color: var(--gold); } .cat-card.strong { border-left-color: var(--green); } .cat-card.caution { border-left-color: var(--amber); }
+  .cat-name { font-size: 10px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .cat-margin { font-size: 9px; font-family: var(--font-mono); }
+  .cat-revenue { font-size: 12px; font-family: var(--font-mono); color: var(--gold-dark); font-weight: bold; }
+  .margin-high { color: var(--green); } .margin-mid { color: var(--amber); }
+
+  .insight-list { display: flex; flex-direction: column; gap: 8px; }
+  .insight-card { display: flex; gap: 10px; padding: 10px 12px; background: var(--bg); border-radius: 4px; border: 1px solid var(--border); }
+  .insight-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .insight-text { font-size: 10px; color: var(--text); line-height: 1.5; }
+  .insight-text strong { color: var(--gold-dark); }
+
+  .mini-stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+  .mini-stat { background: var(--bg); border-radius: 4px; padding: 10px 12px; text-align: center; border: 1px solid var(--border); }
+  .mini-stat-val { font-family: var(--font-mono); font-size: 20px; font-weight: bold; color: var(--gold-dark); }
+  .mini-stat-label { font-size: 8px; color: var(--subtext); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 3px; }
+
+  .event-list { display: flex; flex-direction: column; gap: 6px; }
+  .event-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; background: var(--bg); border-radius: 4px; border: 1px solid var(--border); }
+  .event-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .event-dot.active { background: var(--green-light); } .event-dot.planned { background: var(--gold); } .event-dot.recurring { background: var(--navy-light); }
+  .event-name { font-size: 10px; font-weight: 600; color: var(--text); flex: 1; }
+  .event-freq { font-size: 9px; color: var(--subtext); width: 90px; text-align: right; }
+  .event-rev { font-size: 10px; font-family: var(--font-mono); color: var(--gold-dark); font-weight: bold; width: 80px; text-align: right; }
+
+  .footer { background: var(--navy); border-top: 3px solid var(--gold); padding: 10px 28px; display: flex; align-items: center; justify-content: space-between; }
+  .footer-left { font-size: 9px; color: rgba(255,255,255,0.4); }
+  .footer-right { font-size: 9px; color: rgba(255,255,255,0.4); }
+  .footer-right span { color: var(--gold); }
+
+  @media (max-width: 900px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .two-col, .three-col, .wide-narrow { grid-template-columns: 1fr; }
+    .cat-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div>
+      <div class="logo-name">BROWNSTONE</div>
+      <div class="logo-sub">Analytics</div>
+    </div>
+    <div class="divider-v"></div>
+    <div>
+      <div class="client-name">Humble Bumble Book Store</div>
+      <div class="client-sub">Business Intelligence Dashboard &nbsp;|&nbsp; Retail Operations &amp; Growth Intelligence</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="status-badge">&#9673; Year 2 Operations</div>
+    <div class="date-stamp">Mar 2026</div>
+    <div class="powered-by">Powered by <span>Brownstone Analytics</span></div>
+  </div>
+</div>
+
+<div class="nav-tabs">
+  <div class="tab active" onclick="switchTab('executive',this)">Executive Summary</div>
+  <div class="tab" onclick="switchTab('revenue',this)">Revenue &amp; Margins</div>
+  <div class="tab" onclick="switchTab('inventory',this)">Inventory Intelligence</div>
+  <div class="tab" onclick="switchTab('community',this)">Community &amp; Events</div>
+</div>
+
+<div class="content">
+
+<!-- TAB 1: EXECUTIVE SUMMARY -->
+<div id="pane-executive" class="tab-pane active">
+  <div class="alert-banner">
+    <div class="alert-dot"></div>
+    <div class="alert-text"><strong>GO - Performing:</strong> Humble Bumble is cash-flow positive and growing. March traffic is up 18% vs. prior year. Key risk: new book margins are diluted by slow-moving titles. Recommend shifting 12% of new-title budget to sidelines and used inventory.</div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card gold">
+      <div class="kpi-label">Monthly Revenue (Mar)</div>
+      <div class="kpi-value gold-text">$28,400</div>
+      <div class="kpi-sub">All revenue streams combined</div>
+      <div class="kpi-delta up">&#9650; +14% vs. Mar 2025</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Gross Profit Margin</div>
+      <div class="kpi-value green-text">41.2%</div>
+      <div class="kpi-sub">Blended across all categories</div>
+      <div class="kpi-delta up">&#9650; +3.1pts vs. prior year</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">Avg. Transaction Value</div>
+      <div class="kpi-value amber-text">$34.80</div>
+      <div class="kpi-sub">Per customer visit</div>
+      <div class="kpi-delta neutral">&#9679; Target: $38.00</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">Monthly Foot Traffic</div>
+      <div class="kpi-value" style="font-size:24px;">1,247</div>
+      <div class="kpi-sub">Unique customer visits</div>
+      <div class="kpi-delta up">&#9650; +18% YoY</div>
+    </div>
+  </div>
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title">Business Health Milestones</div>
+      <div class="milestone-list">
+        <div class="milestone-item done"><div class="milestone-icon done">&#10003;</div><div><div class="milestone-name">Break-Even Achieved</div><div class="milestone-meta">Month 7 of operations &nbsp;<span>Aug 2024</span></div></div></div>
+        <div class="milestone-item done"><div class="milestone-icon done">&#10003;</div><div><div class="milestone-name">Community Membership Program Launched</div><div class="milestone-meta">55 active members at $19/mo &nbsp;<span>Nov 2024</span></div></div></div>
+        <div class="milestone-item done"><div class="milestone-icon done">&#10003;</div><div><div class="milestone-name">Used Book Buyback Program Active</div><div class="milestone-meta">~80 titles/month acquired &nbsp;<span>Jan 2025</span></div></div></div>
+        <div class="milestone-item active"><div class="milestone-icon active">&#9654;</div><div><div class="milestone-name">Sidelines Expansion (Gifts &amp; Stationery)</div><div class="milestone-meta">In progress &nbsp;<span>Q2 2026 target</span></div></div></div>
+        <div class="milestone-item upcoming"><div class="milestone-icon upcoming">&#9675;</div><div><div class="milestone-name">Online Store / Curbside Pickup Launch</div><div class="milestone-meta">Planned &nbsp;<span>Q3 2026</span></div></div></div>
+        <div class="milestone-item upcoming"><div class="milestone-icon upcoming">&#9675;</div><div><div class="milestone-name">Second Location Feasibility Analysis</div><div class="milestone-meta">Decision gate &nbsp;<span>Q4 2026</span></div></div></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="panel">
+        <div class="panel-title">Revenue Breakdown (Mar 2026)</div>
+        <table class="rev-table">
+          <thead><tr><th>Stream</th><th>Revenue</th><th>% Total</th><th>Margin</th></tr></thead>
+          <tbody>
+            <tr><td class="row-label">New Books</td><td>$14,200</td><td>50.0%</td><td style="color:var(--amber);">32%</td></tr>
+            <tr><td class="row-label">Used Books</td><td>$5,100</td><td>18.0%</td><td style="color:var(--green);">68%</td></tr>
+            <tr><td class="row-label">Gifts &amp; Sidelines</td><td>$4,600</td><td>16.2%</td><td style="color:var(--green);">55%</td></tr>
+            <tr><td class="row-label">Events &amp; Programs</td><td>$2,200</td><td>7.7%</td><td style="color:var(--green);">61%</td></tr>
+            <tr><td class="row-label">Cafe / Beverage</td><td>$1,255</td><td>4.4%</td><td style="color:var(--amber);">38%</td></tr>
+            <tr><td class="row-label">Memberships</td><td>$1,045</td><td>3.7%</td><td style="color:var(--green);">92%</td></tr>
+            <tr class="total-row"><td class="row-label">TOTAL</td><td>$28,400</td><td>100%</td><td style="color:var(--gold-dark);">41.2%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="panel-title">CDO Insight</div>
+        <div class="insight-card">
+          <div class="insight-icon">&#9888;</div>
+          <div class="insight-text"><strong>Margin gap alert:</strong> New books are 50% of revenue but only 32% margin. Used books and sidelines generate higher margins on less floor space. Shifting the mix 10 points adds ~$800/month in net profit with no additional rent cost.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2: REVENUE & MARGINS -->
+<div id="pane-revenue" class="tab-pane">
+  <div class="alert-banner warning">
+    <div class="alert-dot"></div>
+    <div class="alert-text"><strong>Watch:</strong> Average transaction value ($34.80) is running $3.20 below target. Curated "reading kits" and staff recommendation cards at checkout could close this gap without increasing foot traffic.</div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card green">
+      <div class="kpi-label">Gross Profit (Mar)</div>
+      <div class="kpi-value green-text">$11,701</div>
+      <div class="kpi-sub">After COGS, before operating costs</div>
+      <div class="kpi-delta up">&#9650; +$2,100 vs. Mar 2025</div>
+    </div>
+    <div class="kpi-card gold">
+      <div class="kpi-label">Operating Profit</div>
+      <div class="kpi-value gold-text">$2,850</div>
+      <div class="kpi-sub">After rent, payroll, utilities</div>
+      <div class="kpi-delta up">&#9650; 8 of last 9 months profitable</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-label">Break-Even Revenue</div>
+      <div class="kpi-value amber-text">$21,400</div>
+      <div class="kpi-sub">Monthly fixed cost floor</div>
+      <div class="kpi-delta up">&#9650; $7,000 above break-even</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-label">Conversion Rate</div>
+      <div class="kpi-value" style="font-size:24px;">65.8%</div>
+      <div class="kpi-sub">% visitors who purchase</div>
+      <div class="kpi-delta up">&#9650; Industry avg ~58%</div>
+    </div>
+  </div>
+  <div class="wide-narrow">
+    <div class="panel">
+      <div class="panel-title">Monthly Revenue Trend (Oct 2025 - Mar 2026)</div>
+      <div class="bar-chart">
+        <div class="bar-row"><div class="bar-label">Oct 2025</div><div class="bar-track"><div class="bar-fill blue-bar" style="width:50%;">$18,200</div></div></div>
+        <div class="bar-row"><div class="bar-label">Nov 2025</div><div class="bar-track"><div class="bar-fill gold-bar" style="width:63%;">$22,800</div></div></div>
+        <div class="bar-row"><div class="bar-label">Dec 2025</div><div class="bar-track"><div class="bar-fill green-bar" style="width:100%;">$36,100</div></div></div>
+        <div class="bar-row"><div class="bar-label">Jan 2026</div><div class="bar-track"><div class="bar-fill blue-bar" style="width:46%;">$16,500</div></div></div>
+        <div class="bar-row"><div class="bar-label">Feb 2026</div><div class="bar-track"><div class="bar-fill gold-bar" style="width:69%;">$24,900</div></div></div>
+        <div class="bar-row"><div class="bar-label">Mar 2026</div><div class="bar-track"><div class="bar-fill green-bar" style="width:79%;">$28,400</div></div></div>
+      </div>
+      <div style="margin-top:12px;font-size:9px;color:var(--subtext);">December spike driven by holiday gifting and author signing event. January dip is seasonal. Recovery pace to Feb/Mar is running ahead of prior year by 11%.</div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Annual Scenario</div>
+      <table class="rev-table">
+        <thead><tr><th>Scenario</th><th>Annual</th><th>Verdict</th></tr></thead>
+        <tbody>
+          <tr><td class="row-label">Conservative</td><td>$298K</td><td class="conditional">HOLD</td></tr>
+          <tr class="highlight-row"><td class="row-label">Base Case</td><td>$336K</td><td class="go">GO</td></tr>
+          <tr><td class="row-label">Optimistic</td><td>$378K</td><td class="go">STRONG</td></tr>
+        </tbody>
+      </table>
+      <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div class="mini-stat"><div class="mini-stat-val">$8,640</div><div class="mini-stat-label">Fixed Cost/Mo</div></div>
+        <div class="mini-stat"><div class="mini-stat-val">10.0%</div><div class="mini-stat-label">Op. Margin</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Margin Intelligence by Revenue Stream</div>
+    <div class="cat-grid">
+      <div class="cat-card primary"><div class="cat-name">Memberships</div><div class="cat-margin margin-high">Margin: 92% &nbsp;|&nbsp; $1,045/mo</div><div class="cat-revenue">$962 net/mo</div><div style="font-size:9px;color:var(--subtext);margin-top:4px;">55 members at $19/mo. Pure recurring. Target: 100 members by Dec 2026.</div></div>
+      <div class="cat-card strong"><div class="cat-name">Used Books</div><div class="cat-margin margin-high">Margin: 68% &nbsp;|&nbsp; $5,100/mo</div><div class="cat-revenue">$3,468 net/mo</div><div style="font-size:9px;color:var(--subtext);margin-top:4px;">Buyback at $2-4, resell at $8-15. No publisher negotiation. Highest ROI per dollar spent.</div></div>
+      <div class="cat-card strong"><div class="cat-name">Events &amp; Programs</div><div class="cat-margin margin-high">Margin: 61% &nbsp;|&nbsp; $2,200/mo</div><div class="cat-revenue">$1,342 net/mo</div><div style="font-size:9px;color:var(--subtext);margin-top:4px;">Author signings, book club, kids' story time. Drives same-day merchandise purchases.</div></div>
+      <div class="cat-card strong"><div class="cat-name">Gifts &amp; Sidelines</div><div class="cat-margin margin-high">Margin: 55% &nbsp;|&nbsp; $4,600/mo</div><div class="cat-revenue">$2,530 net/mo</div><div style="font-size:9px;color:var(--subtext);margin-top:4px;">Candles, stationery, tote bags. High impulse rate. Currently under-allocated floor space.</div></div>
+      <div class="cat-card caution"><div class="cat-name">Cafe / Beverage</div><div class="cat-margin margin-mid">Margin: 38% &nbsp;|&nbsp; $1,255/mo</div><div class="cat-revenue">$477 net/mo</div><div style="font-size:9px;color:var(--subtext);margin-top:4px;">Low net but high strategic value: dwell time increases basket size by est. 22%. Maintain, don't expand.</div></div>
+      <div class="cat-card caution"><div class="cat-name">New Books</div><div class="cat-margin margin-mid">Margin: 32% &nbsp;|&nbsp; $14,200/mo</div><div class="cat-revenue">$4,544 net/mo</div><div style="font-size:9px;color:var(--subtext);margin-top:4px;">Publisher standard 40-50% off retail. Slow-movers and carrying cost dilute actual margin.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 3: INVENTORY INTELLIGENCE -->
+<div id="pane-inventory" class="tab-pane">
+  <div class="alert-banner warning">
+    <div class="alert-dot"></div>
+    <div class="alert-text"><strong>Action Required:</strong> 23% of new book inventory has been on shelves 90+ days with no sales. These 184 titles represent $2,760 in tied-up capital. Recommend clearance pricing to free cash for higher-velocity categories.</div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card amber"><div class="kpi-label">Inventory Turnover (New)</div><div class="kpi-value amber-text">4.1x</div><div class="kpi-sub">Annual turns - new books</div><div class="kpi-delta neutral">&#9679; Target: 5.0x - 6.0x</div></div>
+    <div class="kpi-card red"><div class="kpi-label">Slow-Moving Titles</div><div class="kpi-value" style="font-size:28px;color:var(--red);">184</div><div class="kpi-sub">90+ days on shelf, no sale</div><div class="kpi-delta down">&#9660; $2,760 capital tied up</div></div>
+    <div class="kpi-card green"><div class="kpi-label">Used Book Turnover</div><div class="kpi-value green-text">6.8x</div><div class="kpi-sub">Annual turns - used inventory</div><div class="kpi-delta up">&#9650; Outperforming new books</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">Days to First Sale</div><div class="kpi-value gold-text">22</div><div class="kpi-sub">Staff-recommended new titles</div><div class="kpi-delta up">&#9650; 12 days faster than floor avg</div></div>
+  </div>
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title">Inventory Velocity by Genre</div>
+      <div class="bar-chart">
+        <div class="bar-row"><div class="bar-label">Staff Picks</div><div class="bar-track"><div class="bar-fill green-bar" style="width:92%;">9.2x turns/yr</div></div></div>
+        <div class="bar-row"><div class="bar-label">Local Authors</div><div class="bar-track"><div class="bar-fill green-bar" style="width:84%;">8.4x turns/yr</div></div></div>
+        <div class="bar-row"><div class="bar-label">Children's</div><div class="bar-track"><div class="bar-fill gold-bar" style="width:76%;">7.6x turns/yr</div></div></div>
+        <div class="bar-row"><div class="bar-label">Bestsellers</div><div class="bar-track"><div class="bar-fill gold-bar" style="width:68%;">6.8x turns/yr</div></div></div>
+        <div class="bar-row"><div class="bar-label">Mystery / Thriller</div><div class="bar-track"><div class="bar-fill blue-bar" style="width:54%;">5.4x turns/yr</div></div></div>
+        <div class="bar-row"><div class="bar-label">Literary Fiction</div><div class="bar-track"><div class="bar-fill amber-bar" style="width:40%;">4.0x turns/yr</div></div></div>
+        <div class="bar-row"><div class="bar-label">Academic / Reference</div><div class="bar-track"><div class="bar-fill red-bar" style="width:22%;">2.2x turns/yr</div></div></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Buying Intelligence - Next Order Cycle</div>
+      <div class="insight-list">
+        <div class="insight-card"><div class="insight-icon">&#9650;</div><div class="insight-text"><strong>Increase:</strong> Children's and local author sections turn at 7-9x. Budget 25% more toward these two categories next cycle.</div></div>
+        <div class="insight-card"><div class="insight-icon">&#9679;</div><div class="insight-text"><strong>Maintain:</strong> Mystery and thriller near the 5x target. Watch for publisher exclusives and signed editions - these turn 40% faster at Humble Bumble's profile.</div></div>
+        <div class="insight-card"><div class="insight-icon">&#9660;</div><div class="insight-text"><strong>Reduce:</strong> Academic and reference at 2.2x - less than half the target. Cut new orders 60% and redirect to used acquisitions in this category only.</div></div>
+        <div class="insight-card"><div class="insight-icon">&#9888;</div><div class="insight-text"><strong>Clear now:</strong> The 184 slow-moving titles are a cash drain. Price at 40% off - recovered capital into used books generates 2x the net return.</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-title">Used Book Buyback Program - Performance &amp; Opportunity</div>
+    <div class="three-col">
+      <div>
+        <div class="mini-stat-row">
+          <div class="mini-stat"><div class="mini-stat-val">82</div><div class="mini-stat-label">Titles Acquired/Mo</div></div>
+          <div class="mini-stat"><div class="mini-stat-val">$248</div><div class="mini-stat-label">Monthly Buy Cost</div></div>
+          <div class="mini-stat"><div class="mini-stat-val">20.6x</div><div class="mini-stat-label">Program ROI</div></div>
+        </div>
+        <div style="font-size:9px;color:var(--subtext);padding:0 4px;">Every $1 spent on buybacks generates $20.57 in revenue - the highest-ROI purchasing activity in the store. Expand program hours and increase per-title offer rates.</div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--subtext);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;">Top Used Categories</div>
+        <div class="bar-chart">
+          <div class="bar-row"><div class="bar-label" style="width:80px;">Fiction</div><div class="bar-track"><div class="bar-fill gold-bar" style="width:80%;">34 titles</div></div></div>
+          <div class="bar-row"><div class="bar-label" style="width:80px;">Self-Help</div><div class="bar-track"><div class="bar-fill green-bar" style="width:52%;">22 titles</div></div></div>
+          <div class="bar-row"><div class="bar-label" style="width:80px;">Children's</div><div class="bar-track"><div class="bar-fill blue-bar" style="width:38%;">16 titles</div></div></div>
+          <div class="bar-row"><div class="bar-label" style="width:80px;">Cookbooks</div><div class="bar-track"><div class="bar-fill amber-bar" style="width:24%;">10 titles</div></div></div>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;color:var(--subtext);margin-bottom:10px;text-transform:uppercase;letter-spacing:0.5px;font-weight:700;">Expansion Opportunities</div>
+        <div class="insight-list">
+          <div class="insight-card"><div class="insight-icon">&#9650;</div><div class="insight-text"><strong>School partnership:</strong> End-of-year drives with 2 local schools = 200+ titles at near-zero cost, $3,000+ incremental revenue per cycle.</div></div>
+          <div class="insight-card"><div class="insight-icon">&#9650;</div><div class="insight-text"><strong>Trade credit program:</strong> Store credit at 1.5x cash value. Credit recipients spend 3x the credit amount on average.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 4: COMMUNITY & EVENTS -->
+<div id="pane-community" class="tab-pane">
+  <div class="alert-banner">
+    <div class="alert-dot"></div>
+    <div class="alert-text"><strong>Competitive Moat:</strong> Humble Bumble's events and community programs drive 22% of total foot traffic - well above the 8-12% industry average. This is something Amazon cannot replicate. Invest here aggressively.</div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card green"><div class="kpi-label">Active Members</div><div class="kpi-value green-text">55</div><div class="kpi-sub">Community membership ($19/mo)</div><div class="kpi-delta up">&#9650; +12 since Nov 2024 launch</div></div>
+    <div class="kpi-card gold"><div class="kpi-label">Events This Month</div><div class="kpi-value gold-text">8</div><div class="kpi-sub">Author, book club, kids programs</div><div class="kpi-delta up">&#9650; $2,200 direct revenue</div></div>
+    <div class="kpi-card amber"><div class="kpi-label">Event Attendance</div><div class="kpi-value amber-text">312</div><div class="kpi-sub">Total attendees this month</div><div class="kpi-delta up">&#9650; 74% purchase in-store same day</div></div>
+    <div class="kpi-card blue"><div class="kpi-label">Membership Target</div><div class="kpi-value" style="font-size:24px;">100</div><div class="kpi-sub">By Dec 2026</div><div class="kpi-delta neutral">&#9679; $1,900/mo MRR at target</div></div>
+  </div>
+  <div class="two-col">
+    <div class="panel">
+      <div class="panel-title">Active Event Programs</div>
+      <div class="event-list">
+        <div class="event-row"><div class="event-dot active"></div><div class="event-name">Author Signing &amp; Reading</div><div class="event-freq">1-2x / month</div><div class="event-rev">$600-900</div></div>
+        <div class="event-row"><div class="event-dot active"></div><div class="event-name">Adult Book Club (3 genres)</div><div class="event-freq">Monthly each</div><div class="event-rev">$450/mo</div></div>
+        <div class="event-row"><div class="event-dot active"></div><div class="event-name">Kids' Story Time</div><div class="event-freq">Weekly (Sat AM)</div><div class="event-rev">$320/mo</div></div>
+        <div class="event-row"><div class="event-dot active"></div><div class="event-name">Teen Book Swap Night</div><div class="event-freq">Monthly</div><div class="event-rev">$180/mo</div></div>
+        <div class="event-row"><div class="event-dot planned"></div><div class="event-name">Local Author Showcase</div><div class="event-freq">Q2 2026 launch</div><div class="event-rev">$500-800</div></div>
+        <div class="event-row"><div class="event-dot planned"></div><div class="event-name">Corporate Book Club (B2B)</div><div class="event-freq">Pilot planned</div><div class="event-rev">$300-600/mo</div></div>
+        <div class="event-row"><div class="event-dot recurring"></div><div class="event-name">Holiday Pop-Up / Seasonal Market</div><div class="event-freq">Nov-Dec annual</div><div class="event-rev">$3,000-5,000</div></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:16px;">
+      <div class="panel">
+        <div class="panel-title">Membership Growth Path</div>
+        <table class="rev-table">
+          <thead><tr><th>Members</th><th>MRR</th><th>Annual</th></tr></thead>
+          <tbody>
+            <tr><td class="row-label">55 (current)</td><td>$1,045</td><td>$12,540</td></tr>
+            <tr class="highlight-row"><td class="row-label">75 (Q3 2026)</td><td>$1,425</td><td>$17,100</td></tr>
+            <tr><td class="row-label">100 (target)</td><td>$1,900</td><td>$22,800</td></tr>
+            <tr><td class="row-label">150 (stretch)</td><td>$2,850</td><td>$34,200</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Strategic Insights</div>
+        <div class="insight-list">
+          <div class="insight-card"><div class="insight-icon">&#9650;</div><div class="insight-text"><strong>B2B opportunity:</strong> Corporate book club program at $300-600/month per company. Two companies signed = $600-1,200/month in near-pure-margin recurring revenue.</div></div>
+          <div class="insight-card"><div class="insight-icon">&#9650;</div><div class="insight-text"><strong>Event multiplier:</strong> 312 attendees x $28 avg same-day spend = est. $6,500 in event-influenced sales, well beyond the $2,200 in direct event fees.</div></div>
+          <div class="insight-card"><div class="insight-icon">&#9679;</div><div class="insight-text"><strong>Free perk, high impact:</strong> Add 48-hour member pre-registration for author events. One perk could accelerate membership from 55 to 80+ within 90 days at zero cost.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  <div class="footer-left">Humble Bumble Book Store &nbsp;|&nbsp; Brownstone Analytics - Fractional CDO Services &nbsp;|&nbsp; Confidential - Sample Demo</div>
+  <div class="footer-right">Powered by <span>Brownstone Analytics</span> &nbsp;|&nbsp; brownstoneanalytics.org</div>
+</div>
+
+<script>
+function switchTab(tabId, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('pane-' + tabId).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>
