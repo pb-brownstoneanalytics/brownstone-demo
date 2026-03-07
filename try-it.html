@@ -108,6 +108,21 @@
       </div>
     </div>
     <input type="file" id="file-input" accept=".csv,.tsv,.xlsx,.xls" />
+    <div style="margin-top:20px;padding:18px 24px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:12px;display:flex;align-items:flex-start;gap:14px;">
+      <div style="font-size:18px;flex-shrink:0;margin-top:1px;">💡</div>
+      <div>
+        <div style="font-family:var(--font-display);font-weight:600;font-size:14px;margin-bottom:4px;">Best results with numeric data</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;">For the best dashboard experience, your file should include at least one <strong>date column</strong> (months, weeks, or dates), one <strong>category column</strong> (department, product type, region), and two or more <strong>numeric columns</strong> (revenue, costs, counts, percentages). Files with only names, addresses, or text won't generate charts. <a href="#" onclick="event.preventDefault();document.getElementById('data-example').style.display=document.getElementById('data-example').style.display==='none'?'block':'none';" style="color:var(--accent);text-decoration:none;font-weight:600;">See an example ↓</a></div>
+        <div id="data-example" style="display:none;margin-top:12px;padding:14px;background:var(--bg-tertiary);border-radius:8px;overflow-x:auto;">
+          <table style="font-size:12px;border-collapse:collapse;white-space:nowrap;">
+            <tr style="border-bottom:2px solid var(--border);"><th style="padding:4px 14px 6px 0;text-align:left;color:var(--text-tertiary);font-weight:600;">Month</th><th style="padding:4px 14px 6px 0;text-align:left;color:var(--text-tertiary);font-weight:600;">Department</th><th style="padding:4px 14px 6px 0;text-align:right;color:var(--text-tertiary);font-weight:600;">Revenue</th><th style="padding:4px 14px 6px 0;text-align:right;color:var(--text-tertiary);font-weight:600;">Expenses</th><th style="padding:4px 14px 6px 0;text-align:right;color:var(--text-tertiary);font-weight:600;">Headcount</th></tr>
+            <tr style="color:var(--text-secondary);"><td style="padding:4px 14px 4px 0;">Jan 2024</td><td style="padding:4px 14px 4px 0;">Sales</td><td style="padding:4px 14px 4px 0;text-align:right;">285,000</td><td style="padding:4px 14px 4px 0;text-align:right;">142,000</td><td style="padding:4px 14px 4px 0;text-align:right;">12</td></tr>
+            <tr style="color:var(--text-secondary);"><td style="padding:4px 14px 4px 0;">Jan 2024</td><td style="padding:4px 14px 4px 0;">Marketing</td><td style="padding:4px 14px 4px 0;text-align:right;">165,000</td><td style="padding:4px 14px 4px 0;text-align:right;">128,000</td><td style="padding:4px 14px 4px 0;text-align:right;">8</td></tr>
+            <tr style="color:var(--text-secondary);"><td style="padding:4px 14px 4px 0;">Feb 2024</td><td style="padding:4px 14px 4px 0;">Sales</td><td style="padding:4px 14px 4px 0;text-align:right;">310,000</td><td style="padding:4px 14px 4px 0;text-align:right;">148,000</td><td style="padding:4px 14px 4px 0;text-align:right;">12</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- COLUMN MAPPER -->
